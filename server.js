@@ -28,10 +28,24 @@ app.post('/api/game_data', (req,resp) => {
 	console.log("game data recieved");
 });
 
+// get id
+// match id to filename in data
+// return said file
 app.get('/api/game_data', (req, resp) => {
-	//req.id
-	//resp.json();
-	console.log("game data sent");
+	console.log("GET /api/game_data");
+	const files = fs.readdirSync("./data");
+	
+	for (let i = 0; i < files.length; i++) {
+		if(files[i] == (req.body.id + "_game_data.json")) {
+			const file = fs.readFileSync("./data/" + files[i]);
+			const json = JSON.parse(file.toString());
+
+			resp.json(json[json.length - 1]);
+			break;
+		}
+	}
+
+
 });
 
 app.get('/api/games', (req, resp) => {
@@ -40,15 +54,13 @@ app.get('/api/games', (req, resp) => {
 	let games = [];
 
 	for (let i = 0; i < files.length; i++) {
-		//let filename = path.join('./data/', files[i]);
-		//console.log(`Current filename: ${filename}`);
-
-		
 		if (files[i].endsWith("_game_data.json")) {
 			const file = fs.readFileSync("./data/" + files[i]);
 			const json = JSON.parse(file.toString());
 
-			games.push(json[json.length - 1].name);
+			let name = json[json.length - 1].name;
+			let id = json[json.length - 1].id;
+			games.push({name, id});
 		}
 	}
 
