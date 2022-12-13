@@ -32,7 +32,7 @@ app.get('/api/game_data', (req, resp) => {
 	const files = fs.readdirSync("./data");
 	
 	for (let i = 0; i < files.length; i++) {
-		if(files[i] == (req.body.id + "_game_data.json")) {
+		if(files[i] == (req.query.id + "_game_data.json")) {
 			const file = fs.readFileSync("./data/" + files[i]);
 			const json = JSON.parse(file.toString());
 
