@@ -14,6 +14,7 @@ app.use(cors())
 
 app.post('/api/game_data', (req,resp) => {
 	const path = "./data/" + req.body.id + "_game_data.json";
+	
 	if (fs.existsSync(path)) {
 		const file = fs.readFileSync(`./data/${req.body.id}_game_data.json`);
 		const json = JSON.parse(file.toString());
@@ -58,6 +59,53 @@ app.get('/api/games', (req, resp) => {
 
 	resp.json(games);
 });
+
+// {
+// 	tag: TAG
+// 	modifiers: [
+// 	[],[]...
+// 	]
+// }
+
+
+// find the file
+// if file doesn't exist, create it
+// parse the file into json
+// if tag doesn't exist, add it
+// add a modifer for the specific tag
+// serialise the json
+// save to file
+app.post('/api/modifier', (req,resp) => {
+	const path = "./data/" + req.body.id + "_modifiers.json";
+	
+	console.log(req.body);
+
+	if (fs.existsSync(path)) {
+		const file = fs.readFileSync(`./data/${req.body.id}_modifiers.json`);
+		const json = JSON.parse(file.toString());
+
+		console.log(req.body.tag);
+		if (!json.includes(req.body.tag)) {
+			json.push({ "tag": req.body.tag, "modifiers": req.body.modifiers });
+			console.log("not included");
+		} else {
+			console.log("included");
+			for (let player in json) {
+				if (player.tag == req.body.tag) {
+					json.player.modifiers.push(req.body.modifiers);
+				}
+			}
+		}
+
+		fs.writeFileSync(`./data/${req.body.id}_modifiers.json`, JSON.stringify(json));
+	} else {
+		fs.writeFileSync(`./data/${req.body.id}_modifiers.json`, JSON.stringify(
+		[{"tag": req.body.tag, "modifiers": req.body.modifiers}]
+		));
+	}
+
+	console.log(`modifier ${req.body.modifiers} added to ${req.body.tag}`)
+})
 
 
 app.listen(port, () => {
