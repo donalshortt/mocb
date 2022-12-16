@@ -25,7 +25,6 @@ app.post('/api/game_data', (req,resp) => {
 	}
 
 	resp.json("game data recieved");
-	console.log("game data recieved");
 });
 
 app.get('/api/game_data', (req, resp) => {
