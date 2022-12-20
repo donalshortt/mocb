@@ -68,6 +68,18 @@ app.get('/api/games', (req, resp) => {
 // }
 
 
+
+function tagExists(json, tag) {
+	for (let currPlayer = 0; currPlayer < json.length; currPlayer++) {
+		//console.log(`json[player].player tag: ${json[player].player.tag}`);
+		//console.log(`tag ${tag}`);
+		if (json[currPlayer].tag == tag) {
+			return true;
+		}
+	}
+
+	return false;
+}
 // find the file
 // if file doesn't exist, create it
 // parse the file into json
@@ -85,14 +97,15 @@ app.post('/api/modifier', (req,resp) => {
 		const json = JSON.parse(file.toString());
 
 		console.log(req.body.tag);
-		if (!json.includes(req.body.tag)) {
-			json.push({ "tag": req.body.tag, "modifiers": req.body.modifiers });
+
+		if (!tagExists(json, req.body.tag)) {
+			json.push({ "tag": req.body.tag, "modifiers": [req.body.modifier] });
 			console.log("not included");
 		} else {
 			console.log("included");
-			for (let player in json) {
+			for (var player of json) {
 				if (player.tag == req.body.tag) {
-					json.player.modifiers.push(req.body.modifiers);
+					player.modifiers.push(req.body.modifier);
 				}
 			}
 		}
@@ -100,11 +113,11 @@ app.post('/api/modifier', (req,resp) => {
 		fs.writeFileSync(`./data/${req.body.id}_modifiers.json`, JSON.stringify(json));
 	} else {
 		fs.writeFileSync(`./data/${req.body.id}_modifiers.json`, JSON.stringify(
-		[{"tag": req.body.tag, "modifiers": req.body.modifiers}]
+		[{"tag": req.body.tag, "modifiers": [req.body.modifier]}]
 		));
 	}
 
-	console.log(`modifier ${req.body.modifiers} added to ${req.body.tag}`)
+	console.log(`modifier ${req.body.modifier} added to ${req.body.tag}`)
 })
 
 
