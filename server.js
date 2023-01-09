@@ -12,19 +12,45 @@ app.use(express.static(path.join(__dirname, '../front/build')));
 //TODO: tighten this to allow only the frontend... when we know what port it'll be running on
 app.use(cors())
 
+// loop over all the players in players
+// for each player, get their current score
+// find the modifiers associated with said score
+// apply them to the score
+// replace score with modified score
+function applyScoreModifiers(body) {
+	const path = "./data/" + body.id + "_modifiers.json";
+	const modifiers = fs.readFileSync(path);
+	const modifiers_json = JSON.parse(modifiers.toString());
+
+	for (player of body.players) {
+		for (modifier of modifiers_json) {
+			if (modifier.tag == player.tag) {
+				console.log("Match!");
+				console.log(modifier.tag);
+			}
+		}
+		console.log(player);
+	}
+
+	return body;
+}
+
 app.post('/api/game_data', (req,resp) => {
 	const path = "./data/" + req.body.id + "_game_data.json";
 	
+	req.body = applyScoreModifiers(req.body);
+
 	if (!fs.existsSync(path)) {
-		fs.writeFileSync(`./data/${req.body.id}_game_data.json`, JSON.stringify([req.body]));
+		fs.writeFileSync(path, JSON.stringify([req.body]));
 		return;
 	}
 
-	const file = fs.readFileSync(`./data/${req.body.id}_game_data.json`);
+	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
 
 	json.push(req.body);
-	fs.writeFileSync(`./data/${req.body.id}_game_data.json`, JSON.stringify(json));
+
+	fs.writeFileSync(path, JSON.stringify(json));
 });
 
 app.get('/api/game_data', (req, resp) => {
@@ -73,14 +99,14 @@ app.post('/api/modifier', (req,resp) => {
 	const path = "./data/" + req.body.id + "_modifiers.json";
 
 	if (!fs.existsSync(path)) {
-		fs.writeFileSync(`./data/${req.body.id}_modifiers.json`, JSON.stringify(
-		[{ "tag": req.body.tag, "modifiers": [req.body.modifier] }]
+		fs.writeFileSync(path, JSON.stringify(
+			[{ "tag": req.body.tag, "modifiers": [req.body.modifier] }]
 		));
 
 		return;
 	}
 
-	const file = fs.readFileSync(`./data/${req.body.id}_modifiers.json`);
+	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
 
 	if (!tagExists(json, req.body.tag)) {
@@ -93,7 +119,7 @@ app.post('/api/modifier', (req,resp) => {
 		}
 	}
 
-	fs.writeFileSync(`./data/${req.body.id}_modifiers.json`, JSON.stringify(json));
+	fs.writeFileSync(path, JSON.stringify(json));
 })
 
 app.get('/api/modifiers', (req, resp) => {
@@ -104,7 +130,7 @@ app.get('/api/modifiers', (req, resp) => {
 		return;
 	}
 
-	const file = fs.readFileSync(`./data/${req.query.id}_modifiers.json`);
+	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
 
 	for (var player of json) {
