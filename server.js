@@ -17,27 +17,64 @@ app.use(cors())
 // find the modifiers associated with said score
 // apply them to the score
 // replace score with modified score
-function applyScoreModifiers(body) {
+/*function applyScoreModifiers(body) {
 	const path = "./data/" + body.id + "_modifiers.json";
 	const modifiers = fs.readFileSync(path);
 	const modifiers_json = JSON.parse(modifiers.toString());
 
 	for (player of body.players) {
-		for (modifier of modifiers_json) {
-			if (modifier.tag == player.tag) {
-				console.log("Match!");
-				console.log(modifier.tag);
+		let modified_score = player.score;
+
+		for (entry of modifiers_json) {
+			if (entry.tag != player.tag) { continue; }
+
+			for (modifier of entry.modifiers) {
+				let value = Object.values(modifier).toString();
+				if (value[0] == "+") {
+					value = value.replace ("+", "1.");
+					modified_score *= parseFloat(value);
+					modified_score = Math.round(modified_score);
+				} else {
+					value = value.replace("-", "0.");
+					value = 1.0 - parseFloat(value);
+					modified_score *= value;
+					modified_score = Math.round(modified_score);
+				}
 			}
 		}
-		console.log(player);
-	}
 
+		player.score = modified_score;
+	}
 	return body;
+}*/
+function computeModifiedScore(score, modifiers) {
+    return modifiers.reduce((acc, mod) => {
+        let [op, value] = Object.entries(mod)[0];
+        value = op === "+" ? 1 + parseFloat(value) : 1 - parseFloat(value);
+        return Math.round(acc * value);
+    }, score);
 }
+
+function applyScoreModifiers(body) {
+    try {
+        const modifiers = JSON.parse(fs.readFileSync(`./data/${body.id}_modifiers.json`));
+        body.players = body.players.map(player => {
+            const playerModifiers = modifiers.find(mod => mod.tag === player.tag);
+            if (playerModifiers) {
+                player.score = computeModifiedScore(player.score, playerModifiers.modifiers);
+            }
+            return player;
+        });
+        return body;
+    } catch (err) {
+        console.log("Error while parsing the json :" + err);
+    }
+}
+
 
 app.post('/api/game_data', (req,resp) => {
 	const path = "./data/" + req.body.id + "_game_data.json";
-	
+
 	req.body = applyScoreModifiers(req.body);
 
 	if (!fs.existsSync(path)) {
