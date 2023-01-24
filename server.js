@@ -45,10 +45,20 @@ function applyScoreModifiers(body) {
 	return body;
 }
 
+// we do this cause i can't find a nice way in vue to choose the last element of the list of player igns
+function inversePlayerIgns(body) {
+	for (player of body.players) {
+		player.igns = player.igns.reverse(); 
+	}
+
+	return body;
+}
+
 app.post('/api/game_data', (req,resp) => {
 	const path = "./data/" + req.body.id + "_game_data.json";
 
 	req.body = applyScoreModifiers(req.body);
+	req.body = inversePlayerIgns(req.body);
 
 	if (!fs.existsSync(path)) {
 		fs.writeFileSync(path, JSON.stringify([req.body]));
