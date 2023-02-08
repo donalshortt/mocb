@@ -16,6 +16,12 @@ app.use(cors())
 
 function applyScoreModifiers(body) {
 	const path = "./data/" + body.id + "_modifiers.json";
+	
+	if (!fs.existsSync(path)) {
+		fs.writeFileSync(path, "[]");
+		return;
+	}
+
 	const modifiers = fs.readFileSync(path);
 	const modifiers_json = JSON.parse(modifiers.toString());
 
@@ -47,6 +53,8 @@ function applyScoreModifiers(body) {
 
 // we do this cause i can't find a nice way in vue to choose the last element of the list of player igns
 function inversePlayerIgns(body) {
+	console.log(body);
+
 	for (player of body.players) {
 		player.igns = player.igns.reverse(); 
 	}
