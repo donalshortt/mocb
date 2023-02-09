@@ -19,7 +19,7 @@ function applyScoreModifiers(body) {
 	
 	if (!fs.existsSync(path)) {
 		fs.writeFileSync(path, "[]");
-		return;
+		return body;
 	}
 
 	const modifiers = fs.readFileSync(path);
@@ -53,8 +53,6 @@ function applyScoreModifiers(body) {
 
 // we do this cause i can't find a nice way in vue to choose the last element of the list of player igns
 function inversePlayerIgns(body) {
-	console.log(body);
-
 	for (player of body.players) {
 		player.igns = player.igns.reverse(); 
 	}
