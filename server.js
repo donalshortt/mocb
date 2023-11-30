@@ -66,6 +66,8 @@ app.post('/api/game_data', (req,resp) => {
 	req.body = applyScoreModifiers(req.body);
 	req.body = inversePlayerIgns(req.body);
 
+	console.log(`Game data recieved! \n {req.body}`);
+
 	if (!fs.existsSync(path)) {
 		fs.writeFileSync(path, JSON.stringify([req.body]));
 		return;
@@ -151,6 +153,8 @@ app.post('/api/modifier', (req,resp) => {
 app.get('/api/modifiers', (req, resp) => {
 	const path = "./data/" + req.query.id + "_modifiers.json";
 
+	console.log(path);
+
 	if (!fs.existsSync(path)) { 
 		resp.json("file not found");
 		return;
@@ -165,6 +169,8 @@ app.get('/api/modifiers', (req, resp) => {
 			return;
 		}
 	}
+
+	resp.json("modifier data not found");
 })
 
 app.listen(port, () => {
