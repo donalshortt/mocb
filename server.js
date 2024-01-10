@@ -153,17 +153,18 @@ app.post('/api/modifier', (req,resp) => {
 app.get('/api/modifiers', (req, resp) => {
 	const path = "./data/" + req.query.id + "_modifiers.json";
 
-	console.log(path);
-
 	if (!fs.existsSync(path)) { 
 		resp.json("file not found");
 		return;
 	}
 
+	console.log(path);
+
 	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
 
 	for (var player of json) {
+		console.log(`player: ${player}`)
 		if (player.tag == req.query.tag) {
 			resp.json(player.modifiers);
 			return;
