@@ -174,6 +174,36 @@ app.get('/api/modifiers', (req, resp) => {
 	resp.json("modifier data not found");
 })
 
+app.delete('/api/modifier', (req, resp) => {
+	// get the modifier based on a tag, ID, name and value.
+	// remove it from wherever its stored.
+	
+	const path = "./data/" + req.query.id + "_modifiers.json";
+
+	if (!fs.existsSync(path)) { 
+		resp.json("file not found");
+		return;
+	}
+
+	const file = fs.readFileSync(path);
+	const json = JSON.parse(file.toString());
+
+	for (var player of json) {
+		if (player.tag == req.query.tag) {
+			for (let key in player.modifiers) {
+				if (modifier.hasOwnProperty(key)) {
+					let value = jsonObject[key];
+					if (key == req.query.key && value == req.query.value) {
+						console.log(`wow: ${req.query.key} -- ${req.query.value}`);
+						console.log(`Delete me! : key: ${key} && value: ${value}`);
+						return;
+					}
+				}
+			}
+		}
+	}
+})
+
 app.listen(port, () => {
 	console.log(`server listening on port: ${port}`);
 });
