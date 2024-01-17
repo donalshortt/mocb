@@ -158,13 +158,10 @@ app.get('/api/modifiers', (req, resp) => {
 		return;
 	}
 
-	console.log(path);
-
 	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
 
 	for (var player of json) {
-		console.log(`player: ${player}`)
 		if (player.tag == req.query.tag) {
 			resp.json(player.modifiers);
 			return;
@@ -177,7 +174,12 @@ app.get('/api/modifiers', (req, resp) => {
 app.delete('/api/modifier', (req, resp) => {
 	// get the modifier based on a tag, ID, name and value.
 	// remove it from wherever its stored.
-	
+		
+	console.log(`ID: ${req.query.id}`);
+	console.log(`tag: ${req.query.tag}`);
+	console.log(`key: ${req.query.key}`);
+	console.log(`value: ${req.query.value}`);
+
 	const path = "./data/" + req.query.id + "_modifiers.json";
 
 	if (!fs.existsSync(path)) { 
@@ -189,19 +191,26 @@ app.delete('/api/modifier', (req, resp) => {
 	const json = JSON.parse(file.toString());
 
 	for (var player of json) {
-		if (player.tag == req.query.tag) {
-			for (let key in player.modifiers) {
-				if (modifier.hasOwnProperty(key)) {
-					let value = jsonObject[key];
-					if (key == req.query.key && value == req.query.value) {
-						console.log(`wow: ${req.query.key} -- ${req.query.value}`);
-						console.log(`Delete me! : key: ${key} && value: ${value}`);
-						return;
-					}
-				}
-			}
-		}
+    	if (player.tag == req.query.tag) {
+        	const index = player.modifiers.findIndex(modifier => {
+            	const [[key, value]] = Object.entries(modifier);
+            	return key == req.query.key && value == parseInt(req.query.value, 10);
+        	});
+        	if (index > -1) {
+				// Splice the array to remove the item
+				player.modifiers.splice(index, 1);
+
+				// Write the updated json back to the file
+				fs.writeFileSync(path, JSON.stringify(json));
+
+				// Send a response to the client
+				resp.json("modifier removed");
+				return;
+        	}
+    	}
 	}
+
+	resp.json("modifier data not found");
 })
 
 app.listen(port, () => {
