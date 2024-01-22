@@ -126,6 +126,8 @@ function tagExists(json, tag) {
 app.post('/api/modifier', (req,resp) => {
 	const path = "./data/" + req.body.id + "_modifiers.json";
 
+	console.log(req.body);
+
 	if (!fs.existsSync(path)) {
 		fs.writeFileSync(path, JSON.stringify(
 			[{ "tag": req.body.tag, "modifiers": [req.body.modifier] }]
@@ -136,6 +138,8 @@ app.post('/api/modifier', (req,resp) => {
 
 	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
+
+	console.log("got ere");
 
 	if (!tagExists(json, req.body.tag)) {
 		json.push({ "tag": req.body.tag, "modifiers": [req.body.modifier] });
@@ -148,6 +152,8 @@ app.post('/api/modifier', (req,resp) => {
 	}
 
 	fs.writeFileSync(path, JSON.stringify(json));
+
+	resp.json("modifier recieved");
 })
 
 app.get('/api/modifiers', (req, resp) => {
