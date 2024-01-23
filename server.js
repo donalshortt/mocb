@@ -126,8 +126,6 @@ function tagExists(json, tag) {
 app.post('/api/modifier', (req,resp) => {
 	const path = "./data/" + req.body.id + "_modifiers.json";
 
-	console.log(req.body);
-
 	if (!fs.existsSync(path)) {
 		fs.writeFileSync(path, JSON.stringify(
 			[{ "tag": req.body.tag, "modifiers": [req.body.modifier] }]
@@ -139,16 +137,15 @@ app.post('/api/modifier', (req,resp) => {
 	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
 
-	console.log("got ere");
+	let player = json.find(obj => obj.tag === req.body.tag);
 
-	if (!tagExists(json, req.body.tag)) {
-		json.push({ "tag": req.body.tag, "modifiers": [req.body.modifier] });
+	if (player) {
+		player.modifiers.push(req.body.modifier);
 	} else {
-		for (var player of json) {
-			if (player.tag == req.body.tag) {
-				player.modifiers.push(req.body.modifier);
-			}
-		}
+		json.push({
+			"tag": req.body.tag,
+			"modifiers": [req.body.modifier]
+		});
 	}
 
 	fs.writeFileSync(path, JSON.stringify(json));
@@ -178,14 +175,6 @@ app.get('/api/modifiers', (req, resp) => {
 })
 
 app.delete('/api/modifier', (req, resp) => {
-	// get the modifier based on a tag, ID, name and value.
-	// remove it from wherever its stored.
-		
-	console.log(`ID: ${req.query.id}`);
-	console.log(`tag: ${req.query.tag}`);
-	console.log(`key: ${req.query.key}`);
-	console.log(`value: ${req.query.value}`);
-
 	const path = "./data/" + req.query.id + "_modifiers.json";
 
 	if (!fs.existsSync(path)) { 
