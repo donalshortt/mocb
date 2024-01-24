@@ -208,6 +208,11 @@ app.delete('/api/modifier', (req, resp) => {
 	resp.json("modifier data not found");
 })
 
+app.delete('/api/player', (req, resp) => {
+	const gamedata_path = "./data/" + req.query.id + "_game_data.json";
+	const modifier_path = "./data/" + req.query.id + "_modifiers.json";
+})
+
 app.listen(port, () => {
 	console.log(`server listening on port: ${port}`);
 });
