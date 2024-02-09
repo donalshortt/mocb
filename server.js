@@ -214,5 +214,16 @@ app.delete('/api/player', (req, resp) => {
 })
 
 app.listen(port, () => {
+	// TODO: maybe not the right place to put initialization code
+	const dataPath = "./data";
+
+	fs.mkdir(dataPath, (err) => {
+		if (err) {
+			console.log("Data directory already exists");
+		} else {
+			console.log("Data directory created");
+		}
+	});
+
 	console.log(`server listening on port: ${port}`);
 });
