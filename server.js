@@ -51,7 +51,7 @@ function applyScoreModifiers(body) {
 	return body;
 }
 
-// we do this cause i can't find a nice way in vue to choose the last element of the list of player igns
+// HACK: we do this cause i can't find a nice way in vue to choose the last element of the list of player igns
 function inversePlayerIgns(body) {
 	for (player of body.players) {
 		player.igns = player.igns.reverse(); 
@@ -60,13 +60,18 @@ function inversePlayerIgns(body) {
 	return body;
 }
 
+function checkIfDuplicateYear(json, date) {
+	console.log(date);
+	for (let i = 0; i < json.length; i++) {
+		if (json[i].date == date) {
+			return true;
+		}
+	}
+	return false;
+}
+
 app.post('/api/game_data', (req,resp) => {
 	const path = "./data/" + req.body.id + "_game_data.json";
-
-	req.body = applyScoreModifiers(req.body);
-	req.body = inversePlayerIgns(req.body);
-
-	console.log(`Game data recieved! \n {req.body}`);
 
 	if (!fs.existsSync(path)) {
 		fs.writeFileSync(path, JSON.stringify([req.body]));
@@ -75,6 +80,17 @@ app.post('/api/game_data', (req,resp) => {
 
 	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
+	
+	if (checkIfDuplicateYear(json, req.body.date)) {
+		console.log("Duplicate year detected");
+		resp.json("Duplicate year detected");
+		return;
+	}
+
+	console.log(`Game data recieved! \n {req.body}`);
+
+	req.body = applyScoreModifiers(req.body);
+	req.body = inversePlayerIgns(req.body);
 
 	json.push(req.body);
 
@@ -112,16 +128,6 @@ app.get('/api/games', (req, resp) => {
 
 	resp.json(games);
 });
-
-function tagExists(json, tag) {
-	for (var player of json) {
-		if (player.tag == tag) {
-			return true;
-		}
-	}
-
-	return false;
-}
 
 app.post('/api/modifier', (req,resp) => {
 	const path = "./data/" + req.body.id + "_modifiers.json";
