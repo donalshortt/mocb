@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
 const gameRoutes = require('./api/routes/gameRoutes');
+const playerRoutes = require('./api/routes/playerRoutes');
 const modifierRoutes = require('./api/routes/modifierRoutes');
 
 const app = express();
@@ -17,6 +18,7 @@ require('./api/utils/fileUtils').initDataDir();
 
 // Routes
 app.use('/api', gameRoutes);
+app.use('/api', playerRoutes);
 app.use('/api', modifierRoutes);
 
 app.listen(port, () => {
