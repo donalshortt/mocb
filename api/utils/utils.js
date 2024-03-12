@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 export function applyScoreModifiers(body) {
 	const path = "./data/" + body.id + "_modifiers.json";
 	
@@ -52,4 +54,16 @@ export function checkIfDuplicateYear(json, date) {
 		}
 	}
 	return false;
+}
+
+export function initDataDir() {
+	const dataPath = "./data";
+
+	fs.mkdir(dataPath, (err) => {
+		if (err) {
+			console.log("Data directory already exists");
+		} else {
+			console.log("Data directory created");
+		}
+	});
 }

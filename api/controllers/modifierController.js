@@ -1,11 +1,6 @@
-//router.post('/modifier', modifierController.postModifier);
-//router.delete('/modifier', modifierController.deleteModifier);
-//router.get('/modifiers', modifierController.getModifiers);
+import fs from 'fs';
 
-const fileUtils = require('../utils/fileUtils');
-
-
-exports.postModifier = (req, resp) => {
+export function postModifier(req, resp) {
 	const path = "./data/" + req.body.id + "_modifiers.json";
 
 	if (!fs.existsSync(path)) {
@@ -35,7 +30,7 @@ exports.postModifier = (req, resp) => {
 	resp.json("modifier recieved");
 };
 
-exports.deleteModifier = (req, resp) => {
+export function deleteModifier(req, resp) {
 	const path = "./data/" + req.query.id + "_modifiers.json";
 
 	if (!fs.existsSync(path)) { 
@@ -69,7 +64,7 @@ exports.deleteModifier = (req, resp) => {
 	resp.json("modifier data not found");
 };
 
-exports.getModifiers = (req, resp) => {
+export function getModifiers(req, resp) {
 	const path = "./data/" + req.query.id + "_modifiers.json";
 
 	if (!fs.existsSync(path)) { 

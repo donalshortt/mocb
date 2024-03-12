@@ -1,10 +1,7 @@
-const utils = require('../utils/utils');
+import { applyScoreModifiers, inversePlayerIgns, checkIfDuplicateYear } from '../utils/utils.js';
+import fs from 'fs';
 
-router.get('/game_data', gameController.getGameData);
-router.post('/game_data', gameController.postGameData);
-router.get('/games', gameController.getGames);
-
-exports.getGameData = (req, resp) => {
+export function getGameData(req, resp) {
 	const files = fs.readdirSync("./data");
 	
 	for (let i = 0; i < files.length; i++) {
@@ -18,7 +15,7 @@ exports.getGameData = (req, resp) => {
 	}
 };
 
-exports.postGameData = (req, resp) => {
+export function postGameData(req, resp) {
 	const path = "./data/" + req.body.id + "_game_data.json";
 
 	if (!fs.existsSync(path)) {
@@ -45,6 +42,20 @@ exports.postGameData = (req, resp) => {
 	fs.writeFileSync(path, JSON.stringify(json));
 };
 
-exports.getGames = (req, resp) => {
-	
+export function getGames(_req, resp) {
+	const files = fs.readdirSync("./data");
+	let games = [];
+
+	for (let i = 0; i < files.length; i++) {
+		if (files[i].endsWith("_game_data.json")) {
+			const file = fs.readFileSync("./data/" + files[i]);
+			const json = JSON.parse(file.toString());
+
+			const name = json[json.length - 1].name;
+			const id = json[json.length - 1].id;
+			games.push({name, id});
+		}
+	}
+
+	resp.json(games);
 }

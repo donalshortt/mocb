@@ -1,9 +1,10 @@
-const express = require('express');
+import express from 'express';
+import * as modifierController from '../controllers/modifierController.js';
+
 const router = express.Router();
-const modifierController = require('../controllers/modifierController');
 
 router.post('/modifier', modifierController.postModifier);
 router.delete('/modifier', modifierController.deleteModifier);
 router.get('/modifiers', modifierController.getModifiers);
 
-module.exports = router;
+export default router;
