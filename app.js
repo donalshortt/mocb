@@ -10,7 +10,7 @@ import modifierRoutes from './api/routes/modifierRoutes.js';
 import { initDataDir } from './api/utils/utils.js';
 
 const app = express();
-const port = process.env.PORT || 3080;
+const port = process.env.PORT || 8080;
 
 // For __dirname in ES6 module
 const __filename = fileURLToPath(import.meta.url);
