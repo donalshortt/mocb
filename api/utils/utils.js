@@ -11,13 +11,13 @@ export function applyScoreModifiers(body) {
 	const modifiers = fs.readFileSync(path);
 	const modifiers_json = JSON.parse(modifiers.toString());
 
-	for (player of body.players) {
+	for (let player of body.players) {
 		let modified_score = player.score;
 
-		for (entry of modifiers_json) {
+		for (let entry of modifiers_json) {
 			if (entry.tag != player.tag) { continue; }
 
-			for (modifier of entry.modifiers) {
+			for (let modifier of entry.modifiers) {
 				let value = Object.values(modifier).toString();
 				if (value[0] == "+") {
 					value = value.replace ("+", "1.");
@@ -39,7 +39,7 @@ export function applyScoreModifiers(body) {
 
 // HACK: we do this cause i can't find a nice way in vue to choose the last element of the list of player igns
 export function inversePlayerIgns(body) {
-	for (player of body.players) {
+	for (let player of body.players) {
 		player.igns = player.igns.reverse(); 
 	}
 
