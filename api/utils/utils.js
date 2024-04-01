@@ -15,7 +15,7 @@ export function applyScoreModifiers(body) {
 		let modified_score = player.score;
 
 		for (let entry of modifiers_json) {
-			if (entry.tag != player.tag) { continue; }
+			if (entry.ign != player.ign) { continue; }
 
 			for (let modifier of entry.modifiers) {
 				let value = Object.values(modifier).toString();
@@ -34,15 +34,6 @@ export function applyScoreModifiers(body) {
 
 		player.score = modified_score;
 	}
-	return body;
-}
-
-// HACK: we do this cause i can't find a nice way in vue to choose the last element of the list of player igns
-export function inversePlayerIgns(body) {
-	for (let player of body.players) {
-		player.igns = player.igns.reverse(); 
-	}
-
 	return body;
 }
 

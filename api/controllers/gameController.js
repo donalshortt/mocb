@@ -1,4 +1,4 @@
-import { applyScoreModifiers, inversePlayerIgns, checkIfDuplicateYear } from '../utils/utils.js';
+import { applyScoreModifiers, checkIfDuplicateYear } from '../utils/utils.js';
 import fs from 'fs';
 
 export function getGameData(req, resp) {
@@ -35,7 +35,6 @@ export function postGameData(req, resp) {
 	console.log(`Game data recieved! \n {req.body}`);
 
 	req.body = applyScoreModifiers(req.body);
-	req.body = inversePlayerIgns(req.body);
 
 	json.push(req.body);
 

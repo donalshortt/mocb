@@ -5,7 +5,7 @@ export function postModifier(req, resp) {
 
 	if (!fs.existsSync(path)) {
 		fs.writeFileSync(path, JSON.stringify(
-			[{ "tag": req.body.tag, "modifiers": [req.body.modifier] }]
+			[{ "ign": req.body.ign, "modifiers": [req.body.modifier] }]
 		));
 
 		return;
@@ -14,13 +14,13 @@ export function postModifier(req, resp) {
 	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
 
-	let player = json.find(obj => obj.tag === req.body.tag);
+	let player = json.find(obj => obj.ign === req.body.ign);
 
 	if (player) {
 		player.modifiers.push(req.body.modifier);
 	} else {
 		json.push({
-			"tag": req.body.tag,
+			"ign": req.body.ign,
 			"modifiers": [req.body.modifier]
 		});
 	}
@@ -42,7 +42,7 @@ export function deleteModifier(req, resp) {
 	const json = JSON.parse(file.toString());
 
 	for (var player of json) {
-    	if (player.tag == req.query.tag) {
+    	if (player.ign == req.query.ign) {
         	const index = player.modifiers.findIndex(modifier => {
             	const [[key, value]] = Object.entries(modifier);
             	return key == req.query.key && value == parseInt(req.query.value, 10);
@@ -76,7 +76,7 @@ export function getModifiers(req, resp) {
 	const json = JSON.parse(file.toString());
 
 	for (var player of json) {
-		if (player.tag == req.query.tag) {
+		if (player.ign == req.query.ign) {
 			resp.json(player.modifiers);
 			return;
 		}
