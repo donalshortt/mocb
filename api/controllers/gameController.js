@@ -26,13 +26,21 @@ export function postGameData(req, resp) {
 	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
 	
-	if (checkIfDuplicateYear(json, req.body.date)) {
+	if (duplicateYear(json, req.body.date)) {
 		console.log("Duplicate year detected");
 		resp.json("Duplicate year detected");
 		return;
 	}
 
-	console.log(`Game data recieved! \n {req.body}`);
+	if (newPlayer(json, req.body.players)) {
+		console.log("New player detected");
+		// TODO: START HERE
+		create_decision(req.body);
+	} else {
+		transferData();
+	}
+
+	console.log(`Game data recieved!`);
 
 	req.body = applyScoreModifiers(req.body);
 
