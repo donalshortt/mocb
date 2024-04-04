@@ -84,6 +84,16 @@ export function newPlayer(json, players) {
 }
 
 export function createDecision() {
+	const path = "./data/" + body.id + "_decisions.json";
+	
+	if (!fs.existsSync(path)) {
+		fs.writeFileSync(path, "[]");
+		return body;
+	}
+
+	const decisions = fs.readFileSync(path);
+	const decisions_json = JSON.parse(modifiers.toString());
+
 
 }
 
