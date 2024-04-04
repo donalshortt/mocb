@@ -1,52 +1,5 @@
 import fs from 'fs';
 
-export function applyScoreModifiers(body) {
-	const path = "./data/" + body.id + "_modifiers.json";
-	
-	if (!fs.existsSync(path)) {
-		fs.writeFileSync(path, "[]");
-		return body;
-	}
-
-	const modifiers = fs.readFileSync(path);
-	const modifiers_json = JSON.parse(modifiers.toString());
-
-	for (let player of body.players) {
-		let modified_score = player.score;
-
-		for (let entry of modifiers_json) {
-			if (entry.ign != player.ign) { continue; }
-
-			for (let modifier of entry.modifiers) {
-				let value = Object.values(modifier).toString();
-				if (value[0] == "+") {
-					value = value.replace ("+", "1.");
-					modified_score *= parseFloat(value);
-					modified_score = Math.round(modified_score);
-				} else {
-					value = value.replace("-", "0.");
-					value = 1.0 - parseFloat(value);
-					modified_score *= value;
-					modified_score = Math.round(modified_score);
-				}
-			}
-		}
-
-		player.score = modified_score;
-	}
-	return body;
-}
-
-export function checkIfDuplicateYear(json, date) {
-	console.log(date);
-	for (let i = 0; i < json.length; i++) {
-		if (json[i].date == date) {
-			return true;
-		}
-	}
-	return false;
-}
-
 export function initDataDir() {
 	const dataPath = "./data";
 
@@ -57,4 +10,41 @@ export function initDataDir() {
 			console.log("Data directory created");
 		}
 	});
+}
+
+export function getDataJSON(path) {
+	if (!fs.existsSync(path)) {
+		return null;
+	}
+
+	const file = fs.readFileSync(path);
+	const json = JSON.parse(file.toString());
+	
+	return json;
+}
+
+export function getOrWriteDataJSON(path) {
+	if (!fs.existsSync(path)) {
+		fs.writeFileSync(path, JSON.stringify([]));
+	}
+
+	const file = fs.readFileSync(path);
+	const json = JSON.parse(file.toString());
+	
+	return json;
+}
+
+export function getOldIGN(id, key) {
+	const path = "./data/" + id + "_decisions.json";
+	const file = fs.readFileSync(path);
+	const json = JSON.parse(file.toString());
+
+	for (let decision of json) {
+		if (decision.key === key) {
+			return decision.old_ign;
+		}
+	}
+
+	console.log("Warning: old ign not found");
+	return null;
 }
