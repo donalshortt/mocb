@@ -1,4 +1,4 @@
-import { applyScoreModifiers, checkIfDuplicateYear } from '../utils/utils.js';
+import { applyScoreModifiers, duplicateYear, newPlayer } from '../utils/utils.js';
 import fs from 'fs';
 
 export function getGameData(req, resp) {
@@ -15,7 +15,7 @@ export function getGameData(req, resp) {
 	}
 };
 
-export function postGameData(req, resp) {
+export async function postGameData(req, resp) {
 	const path = "./data/" + req.body.id + "_game_data.json";
 
 	if (!fs.existsSync(path)) {
@@ -32,12 +32,14 @@ export function postGameData(req, resp) {
 		return;
 	}
 
-	if (newPlayer(json, req.body.players)) {
-		console.log("New player detected");
-		// TODO: START HERE
-		create_decision(req.body);
-	} else {
-		transferData();
+	let new_player = newPlayer(json, req.body.players);
+
+	if (new_player) {
+		let decision = createDecision(req.body, new_player);
+		
+		if (await isNewIgn(decision)) {
+			transferData();
+		}
 	}
 
 	console.log(`Game data recieved!`);

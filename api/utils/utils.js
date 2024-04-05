@@ -59,10 +59,6 @@ export function initDataDir() {
 	});
 }
 
-// first need to detect if a new player ign is detected
-// then need to send question to admin
-// depending on response.. do the dance
-
 export function newPlayer(json, players) {
 	const db_igns = json.players.map(player => player.ign);
 	const req_igns = players.map(player => player.ign);
@@ -70,20 +66,17 @@ export function newPlayer(json, players) {
 	const db_igns_sorted = db_igns.sort();
 	const req_igns_sorted = req_igns.sort();
 	
-	if (db_igns_sorted.length != req_igns_sorted.length) {
-		return true;
-	}
-
 	for (i = 0; i < db_igns_sorted.length; i++) {
 		if (db_igns_sorted[i] != req_igns_sorted[i]) {
-			return true;
+			return req_igns_sorted[i];
 		}
 	}
 
 	return false;
 }
 
-export function createDecision() {
+// is a decision to decide wether is new a new IGN or a new player
+export function createDecision(body, new_player) {
 	const path = "./data/" + body.id + "_decisions.json";
 	
 	if (!fs.existsSync(path)) {
@@ -91,9 +84,15 @@ export function createDecision() {
 		return body;
 	}
 
-	const decisions = fs.readFileSync(path);
-	const decisions_json = JSON.parse(modifiers.toString());
+	const file = fs.readFileSync(path);
+	const json = JSON.parse(file.toString());
 
+	let decision = {
+		date: body.date,
+		ign: new_player
+	}
+
+	json.push(decision)
 
 }
 
