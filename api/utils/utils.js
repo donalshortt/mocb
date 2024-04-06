@@ -90,13 +90,37 @@ export function createDecision(body, new_player) {
 	let decision = {
 		date: body.date,
 		ign: new_player,
+		decision: "undecided",
 	}
 
 	json.push(decision);
 }
 
-export async function isNewIgn(decision) {
+export async function isNewIgn(body, new_player) {
+	const path = "./data/" + body.id + "_decisions.json";
 	
+	if (!fs.existsSync(path)) {
+		fs.writeFileSync(path, "[]");
+		return body;
+	}
+
+	const file = fs.readFileSync(path);
+	const json = JSON.parse(file.toString());
+
+	setInterval(() => {
+		for (let decision of json) {
+			if (decision.date == body.date && decision.ign == new_player) {
+				switch (decision.decision) {
+					case "undecided":
+						continue;
+					case "newIgn":
+						return true;
+					case "newPlayer":
+						return false;
+				};
+			}
+		}
+	}, 5000);
 }
 
 export function transferData() {

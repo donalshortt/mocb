@@ -35,9 +35,9 @@ export async function postGameData(req, resp) {
 	let new_player = newPlayer(json, req.body.players);
 
 	if (new_player) {
-		let decision = createDecision(req.body, new_player);
+		createDecision(req.body, new_player);
 		
-		if (await isNewIgn(decision)) {
+		if (await isNewIgn(req.body, new_player)) {
 			transferData();
 		}
 	}
