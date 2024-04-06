@@ -89,11 +89,14 @@ export function createDecision(body, new_player) {
 
 	let decision = {
 		date: body.date,
-		ign: new_player
+		ign: new_player,
 	}
 
-	json.push(decision)
+	json.push(decision);
+}
 
+export async function isNewIgn(decision) {
+	
 }
 
 export function transferData() {
