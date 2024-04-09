@@ -1,4 +1,4 @@
-import { applyScoreModifiers, duplicateYear, newPlayer } from '../utils/utils.js';
+import { applyScoreModifiers, duplicateYear, newPlayer, isNewIGN } from '../utils/utils.js';
 import fs from 'fs';
 
 export function getGameData(req, resp) {
@@ -16,15 +16,7 @@ export function getGameData(req, resp) {
 };
 
 export async function postGameData(req, resp) {
-	const path = "./data/" + req.body.id + "_game_data.json";
-
-	if (!fs.existsSync(path)) {
-		fs.writeFileSync(path, JSON.stringify([req.body]));
-		return;
-	}
-
-	const file = fs.readFileSync(path);
-	const json = JSON.parse(file.toString());
+	const json = getdataJSON(req.body.id, "game_data");
 	
 	if (duplicateYear(json, req.body.date)) {
 		console.log("Duplicate year detected");
@@ -37,7 +29,7 @@ export async function postGameData(req, resp) {
 	if (new_player) {
 		createDecision(req.body, new_player);
 		
-		if (await isNewIgn(req.body, new_player)) {
+		if (await isNewIGN(req.body, new_player)) {
 			transferData();
 		}
 	}

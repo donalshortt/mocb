@@ -1,15 +1,7 @@
 import fs from 'fs';
 
 export function applyScoreModifiers(body) {
-	const path = "./data/" + body.id + "_modifiers.json";
-	
-	if (!fs.existsSync(path)) {
-		fs.writeFileSync(path, "[]");
-		return body;
-	}
-
-	const modifiers = fs.readFileSync(path);
-	const modifiers_json = JSON.parse(modifiers.toString());
+	const modifiers_json = getDataJSON(body.id, "modifiers");
 
 	for (let player of body.players) {
 		let modified_score = player.score;
@@ -77,15 +69,7 @@ export function newPlayer(json, players) {
 
 // is a decision to decide wether is new a new IGN or a new player
 export function createDecision(body, new_player) {
-	const path = "./data/" + body.id + "_decisions.json";
-	
-	if (!fs.existsSync(path)) {
-		fs.writeFileSync(path, "[]");
-		return body;
-	}
-
-	const file = fs.readFileSync(path);
-	const json = JSON.parse(file.toString());
+	const json = getDataJSON(body.id, "decisions");
 
 	let decision = {
 		date: body.date,
@@ -96,7 +80,7 @@ export function createDecision(body, new_player) {
 	json.push(decision);
 }
 
-export async function isNewIgn(body, new_player) {
+export async function isNewIGN(body, new_player) {
 	const path = "./data/" + body.id + "_decisions.json";
 	
 	if (!fs.existsSync(path)) {
@@ -107,22 +91,57 @@ export async function isNewIgn(body, new_player) {
 	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
 
-	setInterval(() => {
-		for (let decision of json) {
-			if (decision.date == body.date && decision.ign == new_player) {
-				switch (decision.decision) {
-					case "undecided":
-						continue;
-					case "newIgn":
-						return true;
-					case "newPlayer":
-						return false;
-				};
+	return new Promise((resolve) => {
+		setInterval(() => {
+			for (let decision of json) {
+				if (decision.date == body.date && decision.ign == new_player) {
+					clearInterval(intervalID);
+					switch (decision.decision) {
+						case "undecided":
+							break;
+						case "newIgn":
+							resolve(true);
+							break;
+						case "newPlayer":
+							resolve(false);
+							break;
+					};
+				}
 			}
-		}
-	}, 5000);
+		}, 5000);
+	})
+
 }
 
 export function transferData() {
 	console.log("Transferring!");
+}
+
+export function getDataJSON(id, datatype) {
+	const path = "./data/" + id + "_" + datatype + ".json";
+
+	if (!fs.existsSync(path)) {
+		switch (datatype) {
+			case "decisions":
+				// TODO: do this!
+				break;
+			case "modifiers":
+				fs.writeFileSync(path, JSON.stringify(
+					[{ "ign": req.body.ign, "modifiers": [req.body.modifier] }]
+				));
+
+				break;
+			case "game_data":
+				fs.writeFileSync(path, JSON.stringify([req.body]));
+
+				break;
+		}
+		
+		return;
+	}
+
+	const file = fs.readFileSync(path);
+	const json = JSON.parse(file.toString());
+	
+	return json;
 }

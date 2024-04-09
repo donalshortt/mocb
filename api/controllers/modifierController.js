@@ -14,6 +14,8 @@ export function postModifier(req, resp) {
 	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
 
+	const json = getdataJSON(req.body.id, "modifiers");
+
 	let player = json.find(obj => obj.ign === req.body.ign);
 
 	if (player) {
@@ -74,6 +76,8 @@ export function getModifiers(req, resp) {
 
 	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
+
+	const json = getdataJSON(req.query.id, "modifiers");
 
 	for (var player of json) {
 		if (player.ign == req.query.ign) {
