@@ -121,23 +121,20 @@ export function getDataJSON(id, datatype) {
 	const path = "./data/" + id + "_" + datatype + ".json";
 
 	if (!fs.existsSync(path)) {
-		switch (datatype) {
-			case "decisions":
-				// TODO: do this!
-				break;
-			case "modifiers":
-				fs.writeFileSync(path, JSON.stringify(
-					[{ "ign": req.body.ign, "modifiers": [req.body.modifier] }]
-				));
+		return null;
+	}
 
-				break;
-			case "game_data":
-				fs.writeFileSync(path, JSON.stringify([req.body]));
+	const file = fs.readFileSync(path);
+	const json = JSON.parse(file.toString());
+	
+	return json;
+}
 
-				break;
-		}
-		
-		return;
+export function getOrWriteDataJSON(id, datatype) {
+	const path = "./data/" + id + "_" + datatype + ".json";
+
+	if (!fs.existsSync(path)) {
+		fs.writeFileSync(path, JSON.stringify([]));
 	}
 
 	const file = fs.readFileSync(path);

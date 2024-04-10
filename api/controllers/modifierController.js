@@ -1,20 +1,8 @@
 import fs from 'fs';
+import { getOrWriteDataJSON } from '../utils/utils';
 
 export function postModifier(req, resp) {
-	const path = "./data/" + req.body.id + "_modifiers.json";
-
-	if (!fs.existsSync(path)) {
-		fs.writeFileSync(path, JSON.stringify(
-			[{ "ign": req.body.ign, "modifiers": [req.body.modifier] }]
-		));
-
-		return;
-	}
-
-	const file = fs.readFileSync(path);
-	const json = JSON.parse(file.toString());
-
-	const json = getdataJSON(req.body.id, "modifiers");
+	const json = getOrWriteDataJSON(req.query.id, "modifiers");
 
 	let player = json.find(obj => obj.ign === req.body.ign);
 
@@ -33,15 +21,12 @@ export function postModifier(req, resp) {
 };
 
 export function deleteModifier(req, resp) {
-	const path = "./data/" + req.query.id + "_modifiers.json";
+	const json = getdataJSON(req.query.id, "modifiers");
 
-	if (!fs.existsSync(path)) { 
+	if (json == null) {
 		resp.json("file not found");
 		return;
 	}
-
-	const file = fs.readFileSync(path);
-	const json = JSON.parse(file.toString());
 
 	for (var player of json) {
     	if (player.ign == req.query.ign) {
@@ -67,17 +52,12 @@ export function deleteModifier(req, resp) {
 };
 
 export function getModifiers(req, resp) {
-	const path = "./data/" + req.query.id + "_modifiers.json";
+	const json = getdataJSON(req.query.id, "modifiers");
 
-	if (!fs.existsSync(path)) { 
+	if (json == null) {
 		resp.json("file not found");
 		return;
 	}
-
-	const file = fs.readFileSync(path);
-	const json = JSON.parse(file.toString());
-
-	const json = getdataJSON(req.query.id, "modifiers");
 
 	for (var player of json) {
 		if (player.ign == req.query.ign) {
