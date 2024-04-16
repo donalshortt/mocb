@@ -16,8 +16,9 @@ export function getGameData(req, resp) {
 };
 
 export async function postGameData(req, resp) {
-	const json = getdataJSON(req.body.id, "game_data");
-	
+	const path = "./data/" + req.body.id + "_game_data.json";
+	const json = getOrWriteDataJSON(path);
+
 	if (duplicateYear(json, req.body.date)) {
 		console.log("Duplicate year detected");
 		resp.json("Duplicate year detected");
@@ -25,10 +26,8 @@ export async function postGameData(req, resp) {
 	}
 
 	let new_player = newPlayer(json, req.body.players);
-
 	if (new_player) {
 		createDecision(req.body, new_player);
-		
 		if (await isNewIGN(req.body, new_player)) {
 			transferData();
 		}
@@ -37,9 +36,7 @@ export async function postGameData(req, resp) {
 	console.log(`Game data recieved!`);
 
 	req.body = applyScoreModifiers(req.body);
-
 	json.push(req.body);
-
 	fs.writeFileSync(path, JSON.stringify(json));
 };
 

@@ -117,9 +117,7 @@ export function transferData() {
 	console.log("Transferring!");
 }
 
-export function getDataJSON(id, datatype) {
-	const path = "./data/" + id + "_" + datatype + ".json";
-
+export function getDataJSON(path) {
 	if (!fs.existsSync(path)) {
 		return null;
 	}
@@ -130,9 +128,7 @@ export function getDataJSON(id, datatype) {
 	return json;
 }
 
-export function getOrWriteDataJSON(id, datatype) {
-	const path = "./data/" + id + "_" + datatype + ".json";
-
+export function getOrWriteDataJSON(path) {
 	if (!fs.existsSync(path)) {
 		fs.writeFileSync(path, JSON.stringify([]));
 	}
