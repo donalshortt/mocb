@@ -1,7 +1,8 @@
 import fs from 'fs';
 
 export function applyScoreModifiers(body) {
-	const modifiers_json = getDataJSON(body.id, "modifiers");
+	const path = "./data/" + body.id + "_modifiers.json";
+	const modifiers_json = getOrWriteDataJSON(path);
 
 	for (let player of body.players) {
 		let modified_score = player.score;
@@ -52,15 +53,20 @@ export function initDataDir() {
 }
 
 export function newPlayer(json, players) {
-	const db_igns = json.players.map(player => player.ign);
+	if (json.length == 0) {
+		return false;
+	}
+
+	const db_igns = json[json.length - 1].players.map(player => player.ign);
 	const req_igns = players.map(player => player.ign);
 
-	const db_igns_sorted = db_igns.sort();
-	const req_igns_sorted = req_igns.sort();
-	
-	for (i = 0; i < db_igns_sorted.length; i++) {
-		if (db_igns_sorted[i] != req_igns_sorted[i]) {
-			return req_igns_sorted[i];
+	for (let i = 0; i < req_igns.length; i++) {
+		for (let j = 0; j < req_igns.length; j++) {
+			if (req_igns[i] == db_igns[j]) { break; }
+
+			if (j == req_igns.length - 1) {
+				return req_igns[i];
+			}
 		}
 	}
 
@@ -69,7 +75,14 @@ export function newPlayer(json, players) {
 
 // is a decision to decide wether is new a new IGN or a new player
 export function createDecision(body, new_player) {
-	const json = getDataJSON(body.id, "decisions");
+	console.log("Creating decision!");
+
+	console.log(body);
+	console.log("-----------")
+	console.log(new_player);
+
+	const path = "./data/" + body.id + "_decisions.json";
+	const json = getOrWriteDataJSON(path);
 
 	let decision = {
 		date: body.date,
@@ -78,6 +91,7 @@ export function createDecision(body, new_player) {
 	}
 
 	json.push(decision);
+	fs.writeFileSync(path, JSON.stringify(json));
 }
 
 export async function isNewIGN(body, new_player) {
@@ -92,7 +106,7 @@ export async function isNewIGN(body, new_player) {
 	const json = JSON.parse(file.toString());
 
 	return new Promise((resolve) => {
-		setInterval(() => {
+		let intervalID = setInterval(() => {
 			for (let decision of json) {
 				if (decision.date == body.date && decision.ign == new_player) {
 					clearInterval(intervalID);
@@ -110,7 +124,6 @@ export async function isNewIGN(body, new_player) {
 			}
 		}, 5000);
 	})
-
 }
 
 export function transferData() {

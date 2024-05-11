@@ -1,8 +1,9 @@
-import { applyScoreModifiers, duplicateYear, newPlayer } from '../utils/utils.js';
-import fs from 'fs';
+import { getOrWriteDataJSON } from '../utils/utils.js';
 
-export function getDeisions(req, resp) {
-	const json = getdataJSON(req.body.id, "decisions");
+export function getDecisions(req, resp) {
+	const path = "./data/" + req.body.id + "_decisions.json";
+	const json = getOrWriteDataJSON(path);
+	resp.json(json);
 }
 
 export function decide(req, resp) {

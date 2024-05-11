@@ -7,6 +7,7 @@ import { dirname } from 'path';
 
 import gameRoutes from './api/routes/gameRoutes.js';
 import modifierRoutes from './api/routes/modifierRoutes.js';
+import decisionRoutes from './api/routes/decisionRoutes.js';
 import { initDataDir } from './api/utils/utils.js';
 
 const app = express();
@@ -26,6 +27,7 @@ initDataDir();
 // Routes
 app.use('/api', gameRoutes);
 app.use('/api', modifierRoutes);
+app.use('/api', decisionRoutes);
 
 app.listen(port, '0.0.0.0', () => {
     console.log(`Server listening on port: ${port}`);

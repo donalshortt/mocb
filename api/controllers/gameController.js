@@ -1,4 +1,4 @@
-import { applyScoreModifiers, duplicateYear, newPlayer, isNewIGN } from '../utils/utils.js';
+import { createDecision, transferData, applyScoreModifiers, duplicateYear, newPlayer, isNewIGN, getOrWriteDataJSON } from '../utils/utils.js';
 import fs from 'fs';
 
 export function getGameData(req, resp) {
