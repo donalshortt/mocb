@@ -76,12 +76,6 @@ export function newPlayer(json, players) {
 // is a decision to decide wether is new a new IGN or a new player
 // TODO: generalise this function (as the name implies)
 export function createDecision(body, new_player) {
-	console.log("Creating decision!");
-
-	console.log(body);
-	console.log("-----------")
-	console.log(new_player);
-
 	const path = "./data/" + body.id + "_decisions.json";
 	const json = getOrWriteDataJSON(path);
 
@@ -90,6 +84,7 @@ export function createDecision(body, new_player) {
 		ign: new_player,
 		question: "New player detected",
 		options: ["New Player", "New IGN"],
+		decision: "undecided"
 	}
 
 	json.push(decision);
@@ -115,7 +110,7 @@ export async function isNewIGN(body, new_player) {
 					switch (decision.decision) {
 						case "undecided":
 							break;
-						case "newIgn":
+						case "newIGN":
 							resolve(true);
 							break;
 						case "newPlayer":
