@@ -12,7 +12,7 @@ export function decide(req, resp) {
 
 	for (let decision of json) {
 		if (decision.date == req.body.date && decision.ign == req.body.ign) {
-			switch (req.body.)
+//			switch (req.body.)
 		}
 	}
 };
