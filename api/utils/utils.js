@@ -124,7 +124,7 @@ export async function isNewIGN(body, new_player) {
 }
 
 export function transferData() {
-	console.log("Transferring!");
+	console.log("TODO");
 }
 
 export function getDataJSON(path) {
