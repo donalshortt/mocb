@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
 
 export function applyScoreModifiers(body) {
 	const path = "./data/" + body.id + "_modifiers.json";
@@ -73,14 +74,14 @@ export function newPlayer(json, players) {
 	return false;
 }
 
-// is a decision to decide wether is new a new IGN or a new player
+// is a decision to decide wether is a new IGN or a new player
 // TODO: generalise this function (as the name implies)
 export function createDecision(body, new_player) {
 	const path = "./data/" + body.id + "_decisions.json";
 	const json = getOrWriteDataJSON(path);
 
 	let decision = {
-		date: body.date,
+		key: uuidv4(),
 		ign: new_player,
 		question: "New player detected",
 		options: ["New Player", "New IGN"],

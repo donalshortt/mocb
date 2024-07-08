@@ -1,4 +1,5 @@
 import { getOrWriteDataJSON } from '../utils/utils.js';
+import fs from 'fs';
 
 export function getDecisions(req, resp) {
 	const path = "./data/" + req.query.id + "_decisions.json";
@@ -10,12 +11,11 @@ export function decide(req, resp) {
 	const path = "./data/" + req.body.id + "_decisions.json";
 	const json = getOrWriteDataJSON(path);
 
-	console.log('Decision incoming!');
-	console.log(req.body);
-
 	for (let decision of json) {
-		if (decision.date == req.body.date && decision.ign == req.body.ign) {
+		if (decision.key == req.body.key) {
+			console.log("Decision found");
 			decision.decision = req.body.decision;
+			fs.writeFileSync(path, JSON.stringify(json));
 			return;
 		}
 	}
