@@ -1,4 +1,4 @@
-import { createDecision, transferData, applyScoreModifiers, duplicateYear, newPlayer, isNewIGN, getOrWriteDataJSON } from '../utils/utils.js';
+import { createDecision, transferIGN, applyScoreModifiers, duplicateYear, findNewPlayer, isNewIGN, getOrWriteDataJSON, getOldIGN, removeDecision } from '../utils/utils.js';
 import fs from 'fs';
 
 export function getGameData(req, resp) {
@@ -25,11 +25,12 @@ export async function postGameData(req, resp) {
 		return;
 	}
 
-	let new_player = newPlayer(json, req.body.players);
-	if (new_player) {
-		createDecision(req.body, new_player);
-		if (await isNewIGN(req.body, new_player)) {
-			transferData();
+	let new_ign = findNewPlayer(json, req.body.players);
+	if (new_ign) {
+		createDecision(req.body, new_ign);
+		if (await isNewIGN(req.body)) {
+			transferIGN(new_ign, getOldIGN(req.body.key), req.body.id);
+			removeDecision(req.body.id, req.body.key);
 		}
 	}
 

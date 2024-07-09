@@ -12,9 +12,15 @@ export function decide(req, resp) {
 	const json = getOrWriteDataJSON(path);
 
 	for (let decision of json) {
+		console.log(decision.key);
+		console.log(req.body.key);
 		if (decision.key == req.body.key) {
-			console.log("Decision found");
 			decision.decision = req.body.decision;
+
+			if (req.body.decision == "newIGN") {
+				decision.old_ign = req.body.old_ign;
+			}
+
 			fs.writeFileSync(path, JSON.stringify(json));
 			return;
 		}

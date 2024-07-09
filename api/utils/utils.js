@@ -53,7 +53,7 @@ export function initDataDir() {
 	});
 }
 
-export function newPlayer(json, players) {
+export function findNewPlayer(json, players) {
 	if (json.length == 0) {
 		return false;
 	}
@@ -83,6 +83,7 @@ export function createDecision(body, new_player) {
 	let decision = {
 		key: uuidv4(),
 		ign: new_player,
+		old_ign: null,
 		question: "New player detected",
 		options: ["New Player", "New IGN"],
 		decision: "undecided"
@@ -92,7 +93,7 @@ export function createDecision(body, new_player) {
 	fs.writeFileSync(path, JSON.stringify(json));
 }
 
-export async function isNewIGN(body, new_player) {
+export async function isNewIGN(body) {
 	const path = "./data/" + body.id + "_decisions.json";
 	
 	if (!fs.existsSync(path)) {
@@ -106,15 +107,16 @@ export async function isNewIGN(body, new_player) {
 	return new Promise((resolve) => {
 		let intervalID = setInterval(() => {
 			for (let decision of json) {
-				if (decision.date == body.date && decision.ign == new_player) {
-					clearInterval(intervalID);
+				if (decision.key == body.key) {
 					switch (decision.decision) {
 						case "undecided":
 							break;
 						case "newIGN":
+							clearInterval(intervalID);
 							resolve(true);
 							break;
 						case "newPlayer":
+							clearInterval(intervalID);
 							resolve(false);
 							break;
 					};
@@ -124,8 +126,31 @@ export async function isNewIGN(body, new_player) {
 	})
 }
 
-export function transferData() {
-	console.log("TODO");
+export function transferIGN(old_ign, new_ign, id) {
+	const mod_path = "./data/" + id + "_modifiers.json";
+	const game_path = "./data/" + id + "_game_data.json";
+
+	let mod_json = getDataJSON(mod_path);
+	let game_json = getDataJSON(game_path);
+
+	mod_json.repalce(old_ign, new_ign);
+	game_json.replace(old_ign, new_ign);
+
+	fs.writeFileSync(mod_path, JSON.stringify(mod_json));
+	fs.writeFileSync(game_path, JSON.stringify(game_json));
+}
+
+export function removeDecision(id, key) {
+	const path = "./data/" + id + "_modifiers.json";
+	let json = getDataJSON(path);
+
+	for (let decision of json) {
+		if (decision.key == key) {
+			json.splice(json.indexOf(decision), 1);
+		}
+	}
+
+	fs.writeFileSync(path, JSON.stringify(json));
 }
 
 export function getDataJSON(path) {
@@ -148,4 +173,25 @@ export function getOrWriteDataJSON(path) {
 	const json = JSON.parse(file.toString());
 	
 	return json;
+}
+
+export function getOldIGN(id, key) {
+	const path = "./data/" + id + "_decisions.json";
+	
+	if (!fs.existsSync(path)) {
+		fs.writeFileSync(path, "[]");
+		return;
+	}
+
+	const file = fs.readFileSync(path);
+	const json = JSON.parse(file.toString());
+
+	for (let decision of json) {
+		if (decision.key == key) {
+			return decision.old_ign;
+		}
+	}
+
+	console.log("Warning: old ign not found");
+	return null;
 }
