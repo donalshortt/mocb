@@ -27,10 +27,10 @@ export async function postGameData(req, resp) {
 
 	let new_ign = findNewPlayer(json, req.body.players);
 	if (new_ign) {
-		createDecision(req.body, new_ign);
-		if (await isNewIGN(req.body)) {
-			transferIGN(new_ign, getOldIGN(req.body.key), req.body.id);
-			removeDecision(req.body.id, req.body.key);
+		const key = createDecision(req.body, new_ign);
+		if (await isNewIGN(req.body, key)) {
+			transferIGN(new_ign, getOldIGN(key), req.body.id);
+			removeDecision(req.body.id, key);
 		}
 	}
 

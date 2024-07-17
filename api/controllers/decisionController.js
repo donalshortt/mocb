@@ -12,8 +12,6 @@ export function decide(req, resp) {
 	const json = getOrWriteDataJSON(path);
 
 	for (let decision of json) {
-		console.log(decision.key);
-		console.log(req.body.key);
 		if (decision.key == req.body.key) {
 			decision.decision = req.body.decision;
 

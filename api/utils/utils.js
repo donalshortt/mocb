@@ -91,11 +91,15 @@ export function createDecision(body, new_player) {
 
 	json.push(decision);
 	fs.writeFileSync(path, JSON.stringify(json));
+
+	return decision.key;
 }
 
-export async function isNewIGN(body) {
+export async function isNewIGN(body, key) {
 	const path = "./data/" + body.id + "_decisions.json";
 	
+	console.log("waiting for decision");
+
 	if (!fs.existsSync(path)) {
 		fs.writeFileSync(path, "[]");
 		return body;
@@ -106,8 +110,12 @@ export async function isNewIGN(body) {
 
 	return new Promise((resolve) => {
 		let intervalID = setInterval(() => {
+			console.log("checking for decision");
 			for (let decision of json) {
-				if (decision.key == body.key) {
+				console.log(decision.key, key);
+				if (decision.key === body.key) {
+					console.log("decision found")
+					console.log(decision.decision);
 					switch (decision.decision) {
 						case "undecided":
 							break;
@@ -138,6 +146,8 @@ export function transferIGN(old_ign, new_ign, id) {
 
 	fs.writeFileSync(mod_path, JSON.stringify(mod_json));
 	fs.writeFileSync(game_path, JSON.stringify(game_json));
+
+	console.log("transferred");
 }
 
 export function removeDecision(id, key) {
