@@ -105,17 +105,13 @@ export async function isNewIGN(body, key) {
 		return body;
 	}
 
-	const file = fs.readFileSync(path);
-	const json = JSON.parse(file.toString());
-
 	return new Promise((resolve) => {
 		let intervalID = setInterval(() => {
-			console.log("checking for decision");
+			const file = fs.readFileSync(path);
+			const json = JSON.parse(file.toString());
+
 			for (let decision of json) {
-				console.log(decision.key, key);
-				if (decision.key === body.key) {
-					console.log("decision found")
-					console.log(decision.decision);
+				if (decision.key === key) {
 					switch (decision.decision) {
 						case "undecided":
 							break;
@@ -128,6 +124,8 @@ export async function isNewIGN(body, key) {
 							resolve(false);
 							break;
 					};
+				} else {
+					console.log("Not equal??")
 				}
 			}
 		}, 5000);
@@ -138,14 +136,17 @@ export function transferIGN(old_ign, new_ign, id) {
 	const mod_path = "./data/" + id + "_modifiers.json";
 	const game_path = "./data/" + id + "_game_data.json";
 
-	let mod_json = getDataJSON(mod_path);
-	let game_json = getDataJSON(game_path);
+	const mod_json = getDataJSON(mod_path);
+	const game_json = getDataJSON(game_path);
 
-	mod_json.repalce(old_ign, new_ign);
-	game_json.replace(old_ign, new_ign);
+	const mod_string = JSON.stringify(mod_json);
+	const game_string = JSON.stringify(game_json);
 
-	fs.writeFileSync(mod_path, JSON.stringify(mod_json));
-	fs.writeFileSync(game_path, JSON.stringify(game_json));
+	mod_string.replace(old_ign, new_ign);
+	game_string.replace(old_ign, new_ign);
+
+	fs.writeFileSync(mod_path, mod_string);
+	fs.writeFileSync(game_path, game_string);
 
 	console.log("transferred");
 }
@@ -155,7 +156,8 @@ export function removeDecision(id, key) {
 	let json = getDataJSON(path);
 
 	for (let decision of json) {
-		if (decision.key == key) {
+		if (decision.key === key) {
+			console.log("removing decision");
 			json.splice(json.indexOf(decision), 1);
 		}
 	}
