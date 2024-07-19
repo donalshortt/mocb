@@ -12,7 +12,7 @@ export function decide(req, resp) {
 	const json = getOrWriteDataJSON(path);
 
 	for (let decision of json) {
-		if (decision.key == req.body.key) {
+		if (decision.key === req.body.key) {
 			decision.decision = req.body.decision;
 
 			if (req.body.decision == "newIGN") {

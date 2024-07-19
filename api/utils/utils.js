@@ -132,7 +132,7 @@ export async function isNewIGN(body, key) {
 	})
 }
 
-export function transferIGN(old_ign, new_ign, id) {
+export function transferIGN(new_ign, old_ign, id) {
 	const mod_path = "./data/" + id + "_modifiers.json";
 	const game_path = "./data/" + id + "_game_data.json";
 
@@ -142,13 +142,28 @@ export function transferIGN(old_ign, new_ign, id) {
 	const mod_string = JSON.stringify(mod_json);
 	const game_string = JSON.stringify(game_json);
 
+	console.log("mod_string: " + mod_string);
+
+	console.log("============================")
+	console.log("============================")
+	console.log("============================")
+	console.log(old_ign, new_ign);
 	mod_string.replace(old_ign, new_ign);
+	console.log("mod_string: " + mod_string);
+
+
+	console.log("game_string: " + game_string);
+
+	console.log("============================")
+	console.log("============================")
+	console.log("============================")
+	console.log(old_ign, new_ign);
 	game_string.replace(old_ign, new_ign);
+	console.log("game_string: " + game_string);
+
 
 	fs.writeFileSync(mod_path, mod_string);
 	fs.writeFileSync(game_path, game_string);
-
-	console.log("transferred");
 }
 
 export function removeDecision(id, key) {

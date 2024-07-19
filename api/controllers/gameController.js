@@ -29,6 +29,7 @@ export async function postGameData(req, resp) {
 	if (new_ign) {
 		const key = createDecision(req.body, new_ign);
 		if (await isNewIGN(req.body, key)) {
+			await new Promise(r => setTimeout(r, 5000));
 			transferIGN(new_ign, getOldIGN(key), req.body.id);
 			removeDecision(req.body.id, key);
 		}
