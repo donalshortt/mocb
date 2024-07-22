@@ -25,12 +25,11 @@ export async function postGameData(req, resp) {
 		return;
 	}
 
-	let new_ign = findNewPlayer(json, req.body.players);
+	const new_ign = findNewPlayer(json, req.body.players);
 	if (new_ign) {
 		const key = createDecision(req.body, new_ign);
 		if (await isNewIGN(req.body, key)) {
-			await new Promise(r => setTimeout(r, 5000));
-			transferIGN(new_ign, getOldIGN(key), req.body.id);
+			transferIGN(new_ign, getOldIGN(req.body.id, key), req.body.id);
 			removeDecision(req.body.id, key);
 		}
 	}

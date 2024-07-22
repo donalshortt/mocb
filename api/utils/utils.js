@@ -139,28 +139,16 @@ export function transferIGN(new_ign, old_ign, id) {
 	const mod_json = getDataJSON(mod_path);
 	const game_json = getDataJSON(game_path);
 
-	const mod_string = JSON.stringify(mod_json);
-	const game_string = JSON.stringify(game_json);
+	let mod_string = JSON.stringify(mod_json);
+	let game_string = JSON.stringify(game_json);
 
-	console.log("mod_string: " + mod_string);
+	const regex = new RegExp(old_ign, "g");
+	console.log("old ign : new ign", old_ign, new_ign);
+	console.log("pre mod string: ", mod_string);
 
-	console.log("============================")
-	console.log("============================")
-	console.log("============================")
-	console.log(old_ign, new_ign);
-	mod_string.replace(old_ign, new_ign);
-	console.log("mod_string: " + mod_string);
-
-
-	console.log("game_string: " + game_string);
-
-	console.log("============================")
-	console.log("============================")
-	console.log("============================")
-	console.log(old_ign, new_ign);
-	game_string.replace(old_ign, new_ign);
-	console.log("game_string: " + game_string);
-
+	mod_string = mod_string.replace(regex, new_ign);
+	console.log("post mod string: ", mod_string);
+	game_string = game_string.replace(regex, new_ign);
 
 	fs.writeFileSync(mod_path, mod_string);
 	fs.writeFileSync(game_path, game_string);
@@ -204,17 +192,11 @@ export function getOrWriteDataJSON(path) {
 
 export function getOldIGN(id, key) {
 	const path = "./data/" + id + "_decisions.json";
-	
-	if (!fs.existsSync(path)) {
-		fs.writeFileSync(path, "[]");
-		return;
-	}
-
 	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
 
 	for (let decision of json) {
-		if (decision.key == key) {
+		if (decision.key === key) {
 			return decision.old_ign;
 		}
 	}
