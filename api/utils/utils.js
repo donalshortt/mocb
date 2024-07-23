@@ -58,6 +58,8 @@ export function findNewPlayer(json, players) {
 		return false;
 	}
 
+	let results = [];
+
 	const db_igns = json[json.length - 1].players.map(player => player.ign);
 	const req_igns = players.map(player => player.ign);
 
@@ -66,12 +68,12 @@ export function findNewPlayer(json, players) {
 			if (req_igns[i] == db_igns[j]) { break; }
 
 			if (j == req_igns.length - 1) {
-				return req_igns[i];
+				results.push(req_igns[i]);
 			}
 		}
 	}
 
-	return false;
+	return results;
 }
 
 // is a decision to decide wether is a new IGN or a new player
@@ -155,12 +157,11 @@ export function transferIGN(new_ign, old_ign, id) {
 }
 
 export function removeDecision(id, key) {
-	const path = "./data/" + id + "_modifiers.json";
+	const path = "./data/" + id + "_decisions.json";
 	let json = getDataJSON(path);
 
 	for (let decision of json) {
 		if (decision.key === key) {
-			console.log("removing decision");
 			json.splice(json.indexOf(decision), 1);
 		}
 	}
