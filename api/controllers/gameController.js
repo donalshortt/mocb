@@ -1,4 +1,4 @@
-import { createDecision, transferIGN, applyScoreModifiers, duplicateYear, findNewPlayer, isNewIGN, getOrWriteDataJSON, getOldIGN, removeDecision } from '../utils/utils.js';
+import { createDecisions, transferIGN, applyScoreModifiers, duplicateYear, findNewPlayers, isNewIGN, getOrWriteDataJSON, getOldIGN, removeDecision } from '../utils/utils.js';
 import fs from 'fs';
 
 export function getGameData(req, resp) {
@@ -15,6 +15,38 @@ export function getGameData(req, resp) {
 	}
 };
 
+async function awaitDecisions(keys) {
+	let promises = [];
+
+	for (let key of keys) {
+		promises.push(new Promise((resolve) => {
+			let intervalID = setInterval(() => {
+				const file = fs.readFileSync(path);
+				const json = JSON.parse(file.toString());
+
+				for (let decision of json) {
+					if (decision.key === key) {
+						switch (decision.decision) {
+							case "undecided":
+								break;
+							case "newIGN":
+								clearInterval(intervalID);
+								resolve();
+								break;
+							case "newPlayer":
+								clearInterval(intervalID);
+								resolve();
+								break;
+						};
+					}
+				}
+			}, 1000);
+		}))
+	}
+
+	Promise.all(promises);
+}
+
 export async function postGameData(req, resp) {
 	const path = "./data/" + req.body.id + "_game_data.json";
 	const json = getOrWriteDataJSON(path);
@@ -26,10 +58,17 @@ export async function postGameData(req, resp) {
 	}
 
 	// LEFT OFF HERE
-	const new_igns = findNewPlayer(json, req.body.players);
-	if (new_igns.length > 0)
-		const key = createDecision(req.body, new_igns);
-		if (await isNewIGN(req.body, key)) {
+	const new_igns = findNewPlayers(json, req.body.players);
+	if (new_igns.length > 0) {
+		const keys = createDecisions(req.body, new_igns);
+		await awaitDecisions(keys);
+
+		if (await isNewIGN(req.body, keys)) {
+
+
+
+			
+
 			transferIGN(new_igns, getOldIGN(req.body.id, key), req.body.id);
 			removeDecision(req.body.id, key);
 		}

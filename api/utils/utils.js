@@ -53,7 +53,7 @@ export function initDataDir() {
 	});
 }
 
-export function findNewPlayer(json, players) {
+export function findNewPlayers(json, players) {
 	if (json.length == 0) {
 		return false;
 	}
@@ -78,29 +78,31 @@ export function findNewPlayer(json, players) {
 
 // is a decision to decide wether is a new IGN or a new player
 // TODO: generalise this function (as the name implies)
-export function createDecision(body, new_player) {
+export function createDecision(body, new_players) {
 	const path = "./data/" + body.id + "_decisions.json";
 	const json = getOrWriteDataJSON(path);
+	let keys = [];
 
-	let decision = {
-		key: uuidv4(),
-		ign: new_player,
-		old_ign: null,
-		question: "New player detected",
-		options: ["New Player", "New IGN"],
-		decision: "undecided"
+	for (let new_player of new_players) {
+		let decision = {
+			key: uuidv4(),
+			ign: new_player,
+			old_ign: null,
+			question: "New player detected",
+			options: ["New Player", "New IGN"],
+			decision: "undecided"
+		}
+
+		json.push(decision);
+		keys.push(decision.key);
 	}
-
-	json.push(decision);
 	fs.writeFileSync(path, JSON.stringify(json));
 
-	return decision.key;
+	return keys;
 }
 
 export async function isNewIGN(body, key) {
 	const path = "./data/" + body.id + "_decisions.json";
-	
-	console.log("waiting for decision");
 
 	if (!fs.existsSync(path)) {
 		fs.writeFileSync(path, "[]");
