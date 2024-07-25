@@ -1,4 +1,4 @@
-import { createDecisions, transferIGN, applyScoreModifiers, duplicateYear, findNewPlayers, isNewIGN, getOrWriteDataJSON, getOldIGN, removeDecision } from '../utils/utils.js';
+import { getDataJSON, getOrWriteDataJSON } from '../utils/utils.js';
 import fs from 'fs';
 
 export function getGameData(req, resp) {
@@ -15,6 +15,7 @@ export function getGameData(req, resp) {
 	}
 };
 
+// LEFT OFF HERE
 async function awaitDecisions(keys) {
 	let promises = [];
 
@@ -47,6 +48,135 @@ async function awaitDecisions(keys) {
 	Promise.all(promises);
 }
 
+function getDataTransferCandidates(id) {
+	const path = "./data/" + id + "_decisions,json";
+	const file = fs.readFileSync(path);
+	const json = JSON.parse(file.toString());
+
+	let transfer_scores = [];
+
+	for (let decision of json) {
+		if (decision.decision === "newIGN") {
+			transfer_scores.push((decision.old_ign, decision.ign));
+		}
+	}
+
+	return transfer_scores;
+}
+
+function findNewPlayers(json, players) {
+	if (json.length == 0) {
+		return false;
+	}
+
+	let results = [];
+
+	const db_igns = json[json.length - 1].players.map(player => player.ign);
+	const req_igns = players.map(player => player.ign);
+
+	for (let i = 0; i < req_igns.length; i++) {
+		for (let j = 0; j < req_igns.length; j++) {
+			if (req_igns[i] == db_igns[j]) { break; }
+
+			if (j == req_igns.length - 1) {
+				results.push(req_igns[i]);
+			}
+		}
+	}
+
+	return results;
+}
+
+// is a decision to decide wether is a new IGN or a new player
+// TODO: generalise this function (as the name implies)
+function createDecisions(body, new_players) {
+	const path = "./data/" + body.id + "_decisions.json";
+	const json = getOrWriteDataJSON(path);
+	let keys = [];
+
+	for (let new_player of new_players) {
+		let decision = {
+			key: uuidv4(),
+			ign: new_player,
+			old_ign: null,
+			question: "New player detected",
+			options: ["New Player", "New IGN"],
+			decision: "undecided"
+		}
+
+		json.push(decision);
+		keys.push(decision.key);
+	}
+	fs.writeFileSync(path, JSON.stringify(json));
+
+	return keys;
+}
+
+function transferIGNs(candidates, id) {
+	const mod_path = "./data/" + id + "_modifiers.json";
+	const game_path = "./data/" + id + "_game_data.json";
+
+	const mod_json = getDataJSON(mod_path);
+	const game_json = getDataJSON(game_path);
+
+	let mod_string = JSON.stringify(mod_json);
+	let game_string = JSON.stringify(game_json);
+
+	for (let [old_ign, new_ign] of candidates) {
+		const regex = new RegExp(old_ign, "g");
+		mod_string = mod_string.replace(regex, new_ign);
+		game_string = game_string.replace(regex, new_ign);
+	}
+
+	fs.writeFileSync(mod_path, mod_string);
+	fs.writeFileSync(game_path, game_string);
+}
+
+function removeDecisions(id, key) {
+	const path = "./data/" + id + "_decisions.json";
+	fs.writeFileSync(path, JSON.stringify("[]"));
+}
+
+function applyScoreModifiers(body) {
+	const path = "./data/" + body.id + "_modifiers.json";
+	const modifiers_json = getOrWriteDataJSON(path);
+
+	for (let player of body.players) {
+		let modified_score = player.score;
+
+		for (let entry of modifiers_json) {
+			if (entry.ign != player.ign) { continue; }
+
+			for (let modifier of entry.modifiers) {
+				let value = Object.values(modifier).toString();
+				if (value[0] == "+") {
+					value = value.replace ("+", "1.");
+					modified_score *= parseFloat(value);
+					modified_score = Math.round(modified_score);
+				} else {
+					value = value.replace("-", "0.");
+					value = 1.0 - parseFloat(value);
+					modified_score *= value;
+					modified_score = Math.round(modified_score);
+				}
+			}
+		}
+
+		player.score = modified_score;
+	}
+	return body;
+}
+
+function duplicateYear(json, date) {
+	console.log(date);
+	for (let i = 0; i < json.length; i++) {
+		if (json[i].date == date) {
+			return true;
+		}
+	}
+	return false;
+}
+
 export async function postGameData(req, resp) {
 	const path = "./data/" + req.body.id + "_game_data.json";
 	const json = getOrWriteDataJSON(path);
@@ -57,24 +187,21 @@ export async function postGameData(req, resp) {
 		return;
 	}
 
-	// LEFT OFF HERE
 	const new_igns = findNewPlayers(json, req.body.players);
 	if (new_igns.length > 0) {
 		const keys = createDecisions(req.body, new_igns);
 		await awaitDecisions(keys);
 
-		if (await isNewIGN(req.body, keys)) {
-
-
-
-			
-
-			transferIGN(new_igns, getOldIGN(req.body.id, key), req.body.id);
-			removeDecision(req.body.id, key);
+		const transfer_data_candidates = getDataTransferCandidates(req.body.id);
+		if (transfer_data_candidates.length > 0) {
+			transferIGNs(transfer_data_candidates, req.body.id);
 		}
 	}
 
 	console.log(`Game data recieved!`);
+
+	// TODO: might be able to just empty the decisions file of everything
+	removeDecisions(req.body.id, key);
 
 	req.body = applyScoreModifiers(req.body);
 	json.push(req.body);
