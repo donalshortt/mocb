@@ -1,9 +1,10 @@
 import { getDataJSON, getOrWriteDataJSON } from '../utils/utils.js';
 import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
 
 export function getGameData(req, resp) {
 	const files = fs.readdirSync("./data");
-	
+
 	for (let i = 0; i < files.length; i++) {
 		if(files[i] == (req.query.id + "_game_data.json")) {
 			const file = fs.readFileSync("./data/" + files[i]);
@@ -16,7 +17,8 @@ export function getGameData(req, resp) {
 };
 
 // LEFT OFF HERE
-async function awaitDecisions(keys) {
+async function awaitDecisions(keys, id) {
+	const path = "./data/" + id + "_decisions.json";
 	let promises = [];
 
 	for (let key of keys) {
@@ -45,11 +47,11 @@ async function awaitDecisions(keys) {
 		}))
 	}
 
-	Promise.all(promises);
+	await Promise.all(promises);
 }
 
 function getDataTransferCandidates(id) {
-	const path = "./data/" + id + "_decisions,json";
+	const path = "./data/" + id + "_decisions.json";
 	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
 
@@ -91,7 +93,7 @@ function findNewPlayers(json, players) {
 // TODO: generalise this function (as the name implies)
 function createDecisions(body, new_players) {
 	const path = "./data/" + body.id + "_decisions.json";
-	const json = getOrWriteDataJSON(path);
+	let json = getOrWriteDataJSON(path);
 	let keys = [];
 
 	for (let new_player of new_players) {
@@ -107,7 +109,11 @@ function createDecisions(body, new_players) {
 		json.push(decision);
 		keys.push(decision.key);
 	}
+
+
 	fs.writeFileSync(path, JSON.stringify(json));
+	fs.readFileSync(path);
+	console.log("READ JSON: ", JSON.parse(fs.readFileSync(path).toString()));
 
 	return keys;
 }
@@ -132,9 +138,9 @@ function transferIGNs(candidates, id) {
 	fs.writeFileSync(game_path, game_string);
 }
 
-function removeDecisions(id, key) {
+function removeDecisions(id) {
 	const path = "./data/" + id + "_decisions.json";
-	fs.writeFileSync(path, JSON.stringify("[]"));
+	fs.writeFileSync(path, JSON.stringify([]));
 }
 
 function applyScoreModifiers(body) {
@@ -188,9 +194,11 @@ export async function postGameData(req, resp) {
 	}
 
 	const new_igns = findNewPlayers(json, req.body.players);
+	console.log("New igns:", new_igns);
 	if (new_igns.length > 0) {
 		const keys = createDecisions(req.body, new_igns);
-		await awaitDecisions(keys);
+		console.log("Keys: ", keys);
+		await awaitDecisions(keys, req.body.id);
 
 		const transfer_data_candidates = getDataTransferCandidates(req.body.id);
 		if (transfer_data_candidates.length > 0) {
@@ -201,7 +209,7 @@ export async function postGameData(req, resp) {
 	console.log(`Game data recieved!`);
 
 	// TODO: might be able to just empty the decisions file of everything
-	removeDecisions(req.body.id, key);
+	removeDecisions(req.body.id);
 
 	req.body = applyScoreModifiers(req.body);
 	json.push(req.body);
