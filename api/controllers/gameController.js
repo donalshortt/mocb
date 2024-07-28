@@ -48,11 +48,9 @@ async function awaitDecisions(keys, id) {
 	}
 
 	await Promise.all(promises);
-	console.log("PROMISES RESOLVED");
 }
 
 function getDataTransferCandidates(id) {
-	console.log("GETTING DATA TRANSFER CANDIDATES");
 	const path = "./data/" + id + "_decisions.json";
 	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
@@ -60,7 +58,6 @@ function getDataTransferCandidates(id) {
 	let transfer_candidates = [];
 
 	for (let decision of json) {
-		console.log("DECISION: ", decision);
 		if (decision.decision === "newIGN") {
 			transfer_candidates.push([decision.old_ign, decision.ign]);
 		}
@@ -116,7 +113,6 @@ function createDecisions(body, new_players) {
 
 	fs.writeFileSync(path, JSON.stringify(json));
 	fs.readFileSync(path);
-	console.log("READ JSON: ", JSON.parse(fs.readFileSync(path).toString()));
 
 	return keys;
 }
@@ -177,7 +173,6 @@ function applyScoreModifiers(body) {
 }
 
 function duplicateYear(json, date) {
-	console.log(date);
 	for (let i = 0; i < json.length; i++) {
 		if (json[i].date == date) {
 			return true;
@@ -197,14 +192,11 @@ export async function postGameData(req, resp) {
 	}
 
 	const new_igns = findNewPlayers(json, req.body.players);
-	console.log("New igns:", new_igns);
 	if (new_igns.length > 0) {
 		const keys = createDecisions(req.body, new_igns);
-		console.log("Keys: ", keys);
 		await awaitDecisions(keys, req.body.id);
 
 		const transfer_data_candidates = getDataTransferCandidates(req.body.id);
-		console.log("Transfer data candidates: ", transfer_data_candidates);
 		if (transfer_data_candidates.length > 0) {
 			transferIGNs(transfer_data_candidates, req.body.id);
 		}
