@@ -48,22 +48,25 @@ async function awaitDecisions(keys, id) {
 	}
 
 	await Promise.all(promises);
+	console.log("PROMISES RESOLVED");
 }
 
 function getDataTransferCandidates(id) {
+	console.log("GETTING DATA TRANSFER CANDIDATES");
 	const path = "./data/" + id + "_decisions.json";
 	const file = fs.readFileSync(path);
 	const json = JSON.parse(file.toString());
 
-	let transfer_scores = [];
+	let transfer_candidates = [];
 
 	for (let decision of json) {
+		console.log("DECISION: ", decision);
 		if (decision.decision === "newIGN") {
-			transfer_scores.push((decision.old_ign, decision.ign));
+			transfer_candidates.push([decision.old_ign, decision.ign]);
 		}
 	}
 
-	return transfer_scores;
+	return transfer_candidates;
 }
 
 function findNewPlayers(json, players) {
@@ -201,6 +204,7 @@ export async function postGameData(req, resp) {
 		await awaitDecisions(keys, req.body.id);
 
 		const transfer_data_candidates = getDataTransferCandidates(req.body.id);
+		console.log("Transfer data candidates: ", transfer_data_candidates);
 		if (transfer_data_candidates.length > 0) {
 			transferIGNs(transfer_data_candidates, req.body.id);
 		}
