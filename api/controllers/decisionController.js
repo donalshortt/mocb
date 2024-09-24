@@ -7,9 +7,11 @@ export function getDecisions(req, resp) {
 	resp.json(json);
 }
 
-export function decide(req, resp) {
+export function decide(req, _resp) {
 	const path = "./data/" + req.body.id + "_decisions.json";
 	const json = getOrWriteDataJSON(path);
+
+	console.log(req.body);
 
 	for (let decision of json) {
 		if (decision.key === req.body.key) {

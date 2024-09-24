@@ -37,13 +37,9 @@ export function deleteModifier(req, resp) {
             	return key == req.query.key && value == parseInt(req.query.value, 10);
         	});
         	if (index > -1) {
-				// Splice the array to remove the item
 				player.modifiers.splice(index, 1);
-
-				// Write the updated json back to the file
 				fs.writeFileSync(path, JSON.stringify(json));
 
-				// Send a response to the client
 				resp.json("modifier removed");
 				return;
         	}
