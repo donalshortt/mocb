@@ -193,9 +193,9 @@ export async function postGameData(req, resp) {
 	const new_igns = findNewPlayers(json, req.body.players);
 	if (new_igns.length > 0) {
 		const keys = createDecisions(req.body, new_igns);
-		console.log("awiting decisions");
+		console.log("awaiting decisions")
 		await awaitDecisions(keys, req.body.id);
-		console.log("decisions made");
+		console.log("decisions made")
 
 		const transfer_data_candidates = getDataTransferCandidates(req.body.id);
 		if (transfer_data_candidates.length > 0) {
